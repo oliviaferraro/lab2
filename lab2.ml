@@ -44,9 +44,11 @@ To think about before you start coding:
 Now implement the two functions curry and uncurry.
 ......................................................................*)
 
-let curry = fun _ -> failwith "curry not implemented" ;;
-     
-let uncurry = fun _ -> failwith "uncurry not implemented" ;;
+let curry (f : 'a * 'b -> 'c) (x : 'a) (y : 'b) : 'a -> 'b -> 'c = 
+  fun x y -> f (x, y) ;;
+
+let uncurry (f : 'a -> 'b -> 'c) : 'a * 'b -> 'c = 
+  fun (x, y) -> f x y ;;
 
 (*......................................................................
 Exercise 2: OCaml's built in binary operators, like ( + ) and ( * ) are
@@ -113,8 +115,14 @@ Reimplement max_list, but this time, it should return an int option
 instead of an int.
 ......................................................................*)
 
-let max_list (lst : int list) : int option =
-  failwith "max_list not implemented" ;;
+let rec max_list (lst : int list) : int option =
+  match lst with
+  | [] -> None
+  | [elt] -> Some elt
+  | head :: tail -> 
+      match max_list tail with
+      | None -> None
+      | Some x -> Some (max head x) ;;
   
 (*......................................................................
 Exercise 5: Write a function to return the smaller of two int options,
@@ -124,7 +132,11 @@ useful.
 ......................................................................*)
 
 let min_option (x : int option) (y : int option) : int option =
-  failwith "min_option not implemented" ;;
+  match x, y with
+  | None, None -> None
+  | Some x, None -> Some x
+  | None, Some y -> Some y
+  | Some x, Some y -> if x < y then Some x else Some y ;;
      
 (*......................................................................
 Exercise 6: Write a function to return the larger of two int options, or
@@ -132,8 +144,12 @@ None if both are None. If exactly one argument is None, return the
 other.
 ......................................................................*)
 
-let max_option (x : int option) (y : int option) : int option =
-  failwith "max_option not implemented" ;;
+let min_option (x : int option) (y : int option) : int option =
+  match x, y with
+  | None, None -> None
+  | Some x, None -> Some x
+  | None, Some y -> Some y
+  | Some x, Some y -> if x > y then Some x else Some y ;;
 
 (*======================================================================
 Part 3: Polymorphism practice
@@ -153,8 +169,12 @@ result appropriately returned.
 What is calc_option's function signature? Implement calc_option.
 ......................................................................*)
 
-let calc_option =
-  fun _ -> failwith "calc_option not implemented" ;;
+let calc_option (f : 'a -> 'a -> 'a) (x : 'a option) (y : 'a option) =
+  match x, y with
+  | None, None -> None
+  | Some x, None -> Some x
+  | None, Some y -> Some y
+  | Some x, Some y -> Some(f x y) ;;
      
 (*......................................................................
 Exercise 8: Now rewrite min_option and max_option using the higher-order
@@ -175,8 +195,8 @@ AND of two bool options, or None if both are None. If exactly one is
 None, return the other.
 ......................................................................*)
   
-let and_option =
-  fun _ -> failwith "and_option not implemented" ;;
+let and_option (x : bool option) (y : bool option) =
+  calc_option (&&) x y ;;
   
 (*......................................................................
 Exercise 10: In Lab 1, you implemented a function zip that takes two
@@ -195,8 +215,10 @@ type of the result? Did you provide full typing information in the
 first line of the definition?
 ......................................................................*)
 
-let zip_exn =
-  fun _ -> failwith "zip_exn not implemented" ;;
+let rec zip_exn (x : 'a list) (y : 'a list) =
+  match x, y with
+  | [], [] -> []
+  | xhd :: xtl, yhd :: ytl -> (xhd, yhd) :: (zip_exn xtl ytl) ;;
 
 (*......................................................................
 Exercise 11: Another problem with the implementation of zip_exn is that,
@@ -207,8 +229,11 @@ generate an alternate solution without this property?
 Do so below in a new definition of zip.
 ......................................................................*)
 
-let zip =
-  fun _ -> failwith "zip not implemented" ;;
+let rec zip (x : 'a option list) (y : 'a option list) =
+  match x, y with
+  | [], _ -> None
+  | _, [] -> None
+  | xhd :: xtl, yhd :: ytl -> Some ((xhd, yhd) :: (zip xtl ytl)) ;;
 
 (*====================================================================
 Part 4: Factoring out None-handling
